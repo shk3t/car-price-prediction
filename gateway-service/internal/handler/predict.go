@@ -5,13 +5,16 @@ import (
 	"encoding/json"
 	c "gateway/internal/config"
 	m "gateway/internal/model"
+	"gateway/internal/service"
+	u "gateway/internal/utils"
 	"net/http"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 func Predict(fctx *fiber.Ctx) error {
-	body := m.CarEntry{}
+	body := m.CarInfo{}
 	if err := fctx.BodyParser(&body); err != nil {
 		return fctx.Status(400).SendString(err.Error())
 	}
@@ -35,4 +38,18 @@ func Predict(fctx *fiber.Ctx) error {
 	}
 
 	return fctx.JSON(fiber.Map{"price_rub": pred.PriceRub})
+}
+
+func WebScrap(fctx *fiber.Ctx) error {
+	info, err := service.GetCarInfo()
+	if err != nil {
+		return fctx.Status(400).SendString(err.Error())
+	}
+
+	report := u.GetAssertDefault(info, "report", map[string]interface{}{})
+	ptsInfo := u.GetAssertDefault(report, "pts_info", map[string]interface{}{})
+	yearWrapper := u.GetAssertDefault(ptsInfo, "year", map[string]interface{}{})
+	modelYear := u.GetAssertDefault(yearWrapper, "value", -1.0)
+
+	return fctx.SendString(strconv.Itoa(int(modelYear)))
 }

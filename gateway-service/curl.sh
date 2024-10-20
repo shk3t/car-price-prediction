@@ -1,0 +1,5 @@
+curl 'https://auto.ru/-/ajax/desktop-search/getRichVinReport/' \
+  -H 'content-type: application/json' \
+  -H 'cookie: _csrf_token=7caab4b74db0b923f6cbe36f33266757920e418d11447c0c; spravka=dD0xNzI5MTg3NzIxO2k9ODkuMjA3LjIyMS4xMDI7RD03QUIzMUMzNTIxNjIzOEFGRDU4NzQzQTU4MkIwQzEyOTZCMEJCQzQ5QzlGNzM4MDMxNjJEMTgzQTY3RDBGNzRGRjQwQTVFMjcxMzk2MEQyQTc2REVCM0IxNEI4REUwRTUxODIzM0ZEREE1NjAwQkE2OEJGQTQ1Q0YzRDA4MDVFRDI2MDUzRDJCQTcwMUQ5QTdFNkFFRUEyRDt1PTE3MjkxODc3MjEyODUyNzgxNTg7aD1jMmRjZDcxYjViMTQzNmM4YzU5YzE1ZjAwYTllNWEzYw==' \
+  -H 'x-csrf-token: 7caab4b74db0b923f6cbe36f33266757920e418d11447c0c' \
+  --data-raw '{"offerID":"1125106753-40922ec8","pow":{"hash":"00000192ab06594c1070da69b031a515","timestamp":1729446172829,"payload":"1125106753-40922ec8"}}'

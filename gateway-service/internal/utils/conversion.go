@@ -1,4 +1,4 @@
-package force
+package utils
 
 func Default[T any](value T, err error) T {
 	if err != nil {

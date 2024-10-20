@@ -1,6 +1,6 @@
 package model
 
-type CarEntry struct {
+type CarInfo struct {
 	Brand        string  `json:"brand"`
 	Model        string  `json:"model"`
 	ModelYear    int     `json:"model_year"`
@@ -17,4 +17,8 @@ type CarEntry struct {
 
 type PredictionResponse struct {
 	PriceRub float64 `json:"price_rub"`
+}
+
+type WebScrapRequest struct {
+	Url string `json:"url"`
 }
