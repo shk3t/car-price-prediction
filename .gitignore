@@ -1,6 +1,7 @@
 # Personal
 .vscode/
 .idea/
+.DS_Store/
 pyrightconfig.json
 
 # Data
@@ -18,6 +19,12 @@ __pycache__/
 .pytest_cache/
 venv/
 
+# JavaScript
+node_modules/
+dist/
+dist-ssr/
+*.local
+
 # Database
 db.sqlite3
 dump.rdb
@@ -25,6 +32,11 @@ dump.rdb
 # Logs
 logs/
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
 # Builds
 build/
