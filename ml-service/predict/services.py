@@ -134,7 +134,7 @@ class ModelManager:
                         for v in vals
                         if v.endswith("l") and is_float(v[:-1])
                     ]
-                    or [-1.0]
+                    or [np.nan]
                 )[0]
             )
         )
@@ -148,7 +148,7 @@ class ModelManager:
                         for v in vals
                         if v.endswith("hp") and is_float(v[:-2])
                     ]
-                    or [-1.0]
+                    or [np.nan]
                 )[0]
             )
         )
@@ -173,7 +173,7 @@ class ModelManager:
                         for v in vals
                         if v.endswith("-speed") and v[:-6].isdigit()
                     ]
-                    or [-1]
+                    or [np.nan]
                 )[0]
             )
         )

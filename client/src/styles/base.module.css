@@ -1,0 +1,133 @@
+.defaultMargin *:not(div, svg),
+.marginEverything * {
+  margin: var(--default-margin);
+}
+.space {
+  margin: var(--default-margin);
+}
+
+.centeringContainer,
+.vcenteringContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.vcenteringContainer {
+  flex-direction: column;
+}
+ul.vcenteringContainer > li {
+  margin: 0;
+}
+ul.vcenteringContainer > li.big {
+  font-size: 1.3em;
+  margin: 0.2em 0;
+}
+.gridContainer {
+  display: grid;
+}
+
+.frame {
+  padding: 12px 60px;
+  border: 6px solid var(--iris);
+}
+.frame.clickable {
+  transition: 0.3s all;
+  cursor: pointer;
+}
+.frame.clickable:hover {
+  border: 6px solid var(--gold);
+}
+
+.niceButton,
+.niceInput,
+.niceSelect,
+.niceCheckbox::after {
+  transition: 0.2s all;
+}
+
+.niceButton,
+.scaryButton {
+  padding: 10px 20px;
+}
+.niceButton:hover,
+.scaryButton:hover {
+  background-color: var(--highlight-low);
+}
+.niceButton {
+  border: 4px solid var(--gold);
+}
+.niceButton:hover {
+  color: var(--gold);
+}
+.very {
+  border: 4px solid var(--pine);
+}
+.very:hover {
+  color: var(--pine);
+}
+.scaryButton {
+  border: 4px solid var(--love);
+}
+.scaryButton:hover {
+  color: var(--love);
+}
+
+.niceInput,
+.niceSelect {
+  padding: 10px;
+  background-color: var(--overlay);
+}
+
+.niceInput:focus,
+.niceInput:hover {
+  color: var(--rose);
+}
+.niceSelect:hover {
+  color: var(--iris);
+}
+.niceInput::placeholder {
+  color: var(--highlight-high);
+}
+
+.niceSelect {
+  border: 4px solid var(--foam);
+}
+.niceSelect > option {
+  color: var(--text);
+}
+.niceSelect:hover {
+  border: 4px solid var(--iris);
+}
+
+.niceCheckbox {
+  visibility: hidden;
+}
+input[type="checkbox"].niceCheckbox {
+  margin: 16px;
+}
+.niceCheckbox,
+.niceCheckbox::after {
+  aspect-ratio: 1 / 1;
+  width: 1em;
+  outline: 4px solid var(--foam);
+}
+.niceCheckbox::after {
+  visibility: visible;
+  content: "";
+  display: block;
+  background-color: var(--overlay);
+}
+.niceCheckbox:checked::after {
+  background-color: var(--text);
+  box-shadow: inset 0 0 0 4px var(--overlay);
+}
+.niceCheckbox:hover::after {
+  outline: 4px solid var(--iris);
+}
+
+.linkLike {
+  text-decoration: underline;
+}
+.linkLike:hover {
+  cursor: pointer;
+}

@@ -4,41 +4,79 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"gateway/internal/utils"
+	m "gateway/internal/model"
+	u "gateway/internal/utils"
 	"io"
 	"net/http"
+	"os/exec"
+	"strings"
+
+	"github.com/PuerkitoBio/goquery"
 )
 
-func GetCarInfo() (map[string]interface{}, error) {
-	url := "https://auto.ru/-/ajax/desktop-search/getRichVinReport/"
-	offerId := "1125106753-40922ec8"
+func GetCarInfo() (*m.CarInfo, error) {
+	scriptPath := "scripts/curl.sh"
+	// offerId := "1125399844-18893495"
 
-	payload := fmt.Sprintf(
-		`{"offerID":"%s","pow":{"hash":"00000192ab06594c1070da69b031a515","timestamp":1729446172829,"payload":"%s"}}`,
-		offerId,
-		offerId,
-	)
+	cmd := exec.Command("bash", scriptPath)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(payload)))
+	err := cmd.Run()
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("content-type", "application/json")
-	req.Header.Add(
-		"cookie",
-		"_csrf_token=7caab4b74db0b923f6cbe36f33266757920e418d11447c0c; spravka=dD0xNzI5MTg3NzIxO2k9ODkuMjA3LjIyMS4xMDI7RD03QUIzMUMzNTIxNjIzOEFGRDU4NzQzQTU4MkIwQzEyOTZCMEJCQzQ5QzlGNzM4MDMxNjJEMTgzQTY3RDBGNzRGRjQwQTVFMjcxMzk2MEQyQTc2REVCM0IxNEI4REUwRTUxODIzM0ZEREE1NjAwQkE2OEJGQTQ1Q0YzRDA4MDVFRDI2MDUzRDJCQTcwMUQ5QTdFNkFFRUEyRDt1PTE3MjkxODc3MjEyODUyNzgxNTg7aD1jMmRjZDcxYjViMTQzNmM4YzU5YzE1ZjAwYTllNWEzYw==",
-	)
-	req.Header.Add("x-csrf-token", "7caab4b74db0b923f6cbe36f33266757920e418d11447c0c")
 
-	client := http.Client{}
-	resp, err := client.Do(req)
+	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(stdout.Bytes()))
 	if err != nil {
 		return nil, err
 	}
+
+	data, _ := doc.Find("div#sale-data-attributes").First().Attr("data-bem")
+
+	carInfo := m.CarInfo{}
+
+	doc.Find("ul.CardInfo__list-MZpc1").Children().Each(
+		func(_ int, el *goquery.Selection) {
+			attrName := el.Find("div").First().Text()
+			// attrValue := el.Find("div").Last().Text()
+			attrAValue := el.Find("a").First().Text()
+			switch attrName {
+			case "Цвет":
+				carInfo.ExtCol = u.Capitalize(TranslateToEn(attrAValue))
+			}
+		},
+	)
+
+	dataBem := map[string]interface{}{}
+	err = json.Unmarshal([]byte(data), &dataBem)
+	if err != nil {
+		return nil, err
+	}
+
+	saleData := u.GetAssertDefault(dataBem, "sale-data-attributes", map[string]interface{}{})
+	carInfo.Brand = strings.ToLower(u.GetAssertDefault(saleData, "mark", ""))
+	carInfo.FuelType = strings.ToLower(u.GetAssertDefault(saleData, "engine-type", ""))
+
+	return &carInfo, nil
+}
+
+func TranslateToEn(text string) string {
+	// docker run -e LT_LOAD_ONLY="en,ru" -ti --rm -p 5000:5000 libretranslate/libretranslate
+	url := "http://localhost:5000/translate"
+	payload := map[string]string{
+		"q":      text,
+		"source": "ru",
+		"target": "en",
+	}
+	payloadBytes, _ := json.Marshal(payload)
+
+	resp, _ := http.Post(url, "application/json", bytes.NewBuffer(payloadBytes))
 	defer resp.Body.Close()
 
 	respMap := map[string]interface{}{}
-	json.Unmarshal(utils.Default(io.ReadAll(resp.Body)), &respMap)
+	json.Unmarshal(u.Default(io.ReadAll(resp.Body)), &respMap)
 
-	return respMap, nil
+	return u.GetAssertDefault(respMap, "translatedText", "")
 }

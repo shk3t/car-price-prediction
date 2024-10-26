@@ -3,7 +3,9 @@ package main
 import (
 	"gateway/internal/config"
 	"gateway/internal/router"
-	"strconv"
+	"gateway/internal/service"
+
+	// "strconv"
 
 	"github.com/bytedance/sonic"
 	"github.com/gofiber/fiber/v2"
@@ -26,5 +28,7 @@ func main() {
 
 	router.SetupRoutes(app)
 
-	app.Listen(":" + strconv.Itoa(config.Env.Port))
+	// app.Listen(":" + strconv.Itoa(config.Env.Port))
+
+	service.GetCarInfo()
 }

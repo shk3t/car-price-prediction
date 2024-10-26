@@ -11,6 +11,7 @@ model_weights/
 # Private data
 .env
 env.*
+scripts/curl.sh
 
 # Python
 migrations/
