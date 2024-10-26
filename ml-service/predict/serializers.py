@@ -1,9 +1,9 @@
 from rest_framework import serializers
 
-from predict.models import CarEntry
+from predict.models import CarInfo
 
 
 class CarEntrySerializer(serializers.ModelSerializer):
     class Meta:
-        model = CarEntry
+        model = CarInfo
         fields = "__all__"

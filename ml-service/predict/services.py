@@ -12,6 +12,15 @@ from keras.src.optimizers import Adam
 from sklearn.model_selection import KFold
 import random
 
+
+def is_float(value: str) -> bool:
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False
+
+
 VER = 1
 
 
@@ -39,15 +48,17 @@ class ModelManager:
         verbose=True,
     )
 
-    def __init__(self, train, test):
+    def __init__(self, train: pd.DataFrame, test: pd.DataFrame):
         self.dm = self.DataMeta()
 
         TRAIN_LN = len(train)
         all_data = pd.concat([train, test], axis=0, ignore_index=True)
 
-        self.dm.nums = ["model_year", "milage"]  # TODO: try add year
+        self.dm.nums = ["model_year", "milage", "eng_vol", "eng_pow", "trans_speed"]
         self.dm.num_mean = {}
         self.dm.num_std = {}
+
+        all_data = self._data_clearing(all_data)
 
         # STANDARIZE NUMERICAL FEATURES
         for c in self.dm.nums:
@@ -111,6 +122,63 @@ class ModelManager:
 
         self._build = lambda: Model(inputs=[x_input_cats, x_input_nums], outputs=x)
 
+    def _data_clearing(self, data: pd.DataFrame) -> pd.DataFrame:
+        data = data.apply(lambda x: x.str.lower() if x.dtype == "object" else x)  # type: ignore
+        data["eng_vol"] = (
+            data["engine"]
+            .str.split()
+            .apply(
+                lambda vals: (
+                    [
+                        float(v[:-1])
+                        for v in vals
+                        if v.endswith("l") and is_float(v[:-1])
+                    ]
+                    or [-1.0]
+                )[0]
+            )
+        )
+        data["eng_pow"] = (
+            data["engine"]
+            .str.split()
+            .apply(
+                lambda vals: (
+                    [
+                        float(v[:-2])
+                        for v in vals
+                        if v.endswith("hp") and is_float(v[:-2])
+                    ]
+                    or [-1.0]
+                )[0]
+            )
+        )
+        data["trans_type"] = (
+            data["transmission"]
+            .str.split()
+            .apply(
+                lambda vals: (
+                    [v[:-2] for v in vals if v.endswith("/t")]
+                    or ["d" for v in vals if v.endswith("/dual")]
+                    or ["-"]
+                )[0]
+            )
+        )
+        data["trans_speed"] = (
+            data["transmission"]
+            .str.split()
+            .apply(
+                lambda vals: (
+                    [
+                        int(v[:-6])
+                        for v in vals
+                        if v.endswith("-speed") and v[:-6].isdigit()
+                    ]
+                    or [-1]
+                )[0]
+            )
+        )
+        return data.drop(columns=["engine", "transmission"])
+
     @classmethod
     def clean_init(cls):
         train = pd.read_csv("../data/train.csv")
@@ -119,13 +187,15 @@ class ModelManager:
         return cls(train, test)
 
     def prepare_data(self, data):
+        data = self._data_clearing(data)
+
         # STANDARIZE NUMERICAL FEATURES
         for c in self.dm.nums:
             data[c] = (data[c] - self.dm.num_mean[c]) / self.dm.num_std[c]
             data[c] = data[c].fillna(0)
 
         # LABEL ENCODE CATEGORICAL FEATURES
-        for c in self.dm.cats:  # BUG: проверить норм ли инкодит в тестовой выборке
+        for c in self.dm.cats:
             # LABEL ENCODE
             factorization = self.dm.cat_fact[c]
             data[c] = data[c].apply(lambda x: factorization.get(x, -1))
@@ -228,7 +298,7 @@ class ModelManager:
             verbose=2,  # type: ignore
         )
 
-    def get_rmse(self, oof, train):
+    def print_rmse(self, oof, train):
         # COMPUTE AND DISPLAY CV RMSE SCORE
         rmse = np.sqrt(np.mean((oof - train.price.values) ** 2))
         print("Overall CV RMSE =", rmse)
@@ -264,15 +334,13 @@ class ModelManager:
         model_manager.fit(train)
         oof = model_manager.predict(train)
 
-        model_manager.get_rmse(oof, train)
+        model_manager.print_rmse(oof, train)
         model_manager.save_models()
 
 
-# FOR EXPORT
-model_manager = ModelManager.clean_init()
-model_manager.load_models()
-
-
 if __name__ == "__main__":
-    # ModelManager.clean_refit()
-    pass
+    ModelManager.clean_refit()
+else:
+    # FOR EXPORT
+    model_manager = ModelManager.clean_init()
+    model_manager.load_models()

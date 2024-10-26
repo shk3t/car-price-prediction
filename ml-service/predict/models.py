@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class CarEntry(models.Model):
+class CarInfo(models.Model):
     class Meta:
         db_table = "user_file"
         verbose_name = "Запись об автомобиле"
