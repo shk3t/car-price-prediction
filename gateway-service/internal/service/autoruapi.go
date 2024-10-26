@@ -3,7 +3,6 @@ package service
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	m "gateway/internal/model"
 	u "gateway/internal/utils"
 	"io"
@@ -44,7 +43,7 @@ func GetCarInfo() (*m.CarInfo, error) {
 			attrAValue := el.Find("a").First().Text()
 			switch attrName {
 			case "Цвет":
-				carInfo.ExtCol = u.Capitalize(TranslateToEn(attrAValue))
+				carInfo.Color = strings.ToLower(TranslateToEn(attrAValue))
 			}
 		},
 	)
@@ -57,10 +56,31 @@ func GetCarInfo() (*m.CarInfo, error) {
 
 	saleData := u.GetAssertDefault(dataBem, "sale-data-attributes", map[string]interface{}{})
 	carInfo.Brand = strings.ToLower(u.GetAssertDefault(saleData, "mark", ""))
+	carInfo.Model = strings.ToLower(u.GetAssertDefault(saleData, "model", ""))
+	carInfo.ModelYear = int(u.GetAssertDefault(saleData, "year", 0.0))
+	carInfo.MilageKm = int(u.GetAssertDefault(saleData, "km-age", 0.0))
 	carInfo.FuelType = strings.ToLower(u.GetAssertDefault(saleData, "engine-type", ""))
+
+	// carInfo.EngineVolume = u.GetAssertDefault(saleData, "power", 0.0)  // TODO
+	carInfo.EnginePower = u.GetAssertDefault(saleData, "power", 0)
 
 	return &carInfo, nil
 }
+
+// Brand             string  `json:"brand"`
+// Model             string  `json:"model"`
+// ModelYear         int     `json:"model_year"`
+// MilageKm          int     `json:"milage_km"`
+// FuelType          string  `json:"fuel_type"`
+// EngineVolume      float64 `json:"engine_volume"`
+// EnginePower       float64 `json:"engine_power"`
+// TransmissionSpeed float64 `json:"transmission_speed"`
+// TransmissionType  string  `json:"transmission_type"`
+// Color             string  `json:"color"`
+// InteriorColor     string  `json:"interior_color"`
+// Accident          string  `json:"accident"`
+// CleanTitle        string  `json:"clean_title"`
+// PriceRub          float64 `json:"price_rub"`
 
 func TranslateToEn(text string) string {
 	// docker run -e LT_LOAD_ONLY="en,ru" -ti --rm -p 5000:5000 libretranslate/libretranslate
