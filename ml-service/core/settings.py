@@ -3,7 +3,7 @@ from pathlib import Path
 from core import env
 
 if not env.USE_GPU:
-    os.environ["CUDA_VISIBLE_DEVICES"] = ""
+    os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -14,7 +14,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-e2w9+eq_zg-53pr)th2fcyl18!!vjm25x^9ij=03vdy$xk^60$"
+SECRET_KEY = env.SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.DEBUG
@@ -96,8 +96,8 @@ DATABASES = {
         "NAME": env.DB_NAME,
         "USER": env.DB_USER,
         "PASSWORD": env.DB_PASSWORD,
-        "HOST": "127.0.0.1",
-        "PORT": "5432",
+        "HOST": env.DB_HOST,
+        "PORT": env.DB_PORT,
     }
 }
 

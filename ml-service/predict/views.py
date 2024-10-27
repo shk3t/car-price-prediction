@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.request import Request
 from predict.serializers import CarInfoSerializer
 from predict.services import model_manager
+from core import env
 import pandas as pd
 
 

@@ -191,8 +191,8 @@ class ModelManager:
 
     @classmethod
     def clean_init(cls):
-        train = pd.read_csv("../data/train.csv")
-        test = pd.read_csv("../data/test.csv")
+        train = pd.read_csv(env.DATA_DIR + "/train.csv")
+        test = pd.read_csv(env.DATA_DIR + "/test.csv")
         test["price"] = 0
         train = cls._data_clearing(train)
         test = cls._data_clearing(test)
@@ -325,13 +325,13 @@ class ModelManager:
         print("SMAPE =", smape)
         print("RMSLE =", rmsle)
 
-    def save_models(self, folder="../model_weights"):
+    def save_models(self, folder=env.MODEL_WEIGHTS_DIR):
         if not os.path.exists(folder):
             os.makedirs(folder)
         for i, model in enumerate(self.models):
             model.save_weights(f"{folder}/NN_v{VER}_f{i}.weights.h5")
 
-    def load_models(self, folder="../model_weights"):
+    def load_models(self, folder=env.MODEL_WEIGHTS_DIR):
         i = 0
         while True:
             filename = f"{folder}/NN_v{VER}_f{i}.weights.h5"
@@ -345,8 +345,8 @@ class ModelManager:
 
     @classmethod
     def clean_refit(cls):
-        train = pd.read_csv("../data/train.csv")
-        test = pd.read_csv("../data/test.csv")
+        train = pd.read_csv(env.DATA_DIR + "/train.csv")
+        test = pd.read_csv(env.DATA_DIR + "/test.csv")
         test["price"] = 0
         train = cls._data_clearing(train)
         test = cls._data_clearing(test)
@@ -361,11 +361,13 @@ class ModelManager:
         model_manager.print_metrics(pred, train)
         model_manager.save_models()
         CarInfo.objects.all().delete()
+        return model_manager
 
 
 if env.REFIT_MODEL:
-    ModelManager.clean_refit()
-    exit()
+    model_manager = ModelManager.clean_refit()
 else:
     model_manager = ModelManager.clean_init()
     model_manager.load_models()
+
+print("REACHED")
