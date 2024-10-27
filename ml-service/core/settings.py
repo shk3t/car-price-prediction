@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
-
-import env
+from core import env
 
 if not env.USE_GPU:
     os.environ["CUDA_VISIBLE_DEVICES"] = ""
@@ -20,7 +19,7 @@ SECRET_KEY = "django-insecure-e2w9+eq_zg-53pr)th2fcyl18!!vjm25x^9ij=03vdy$xk^60$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.DEBUG
 
-ALLOWED_HOSTS = env.ALLOWED_HOSTS
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
 
 # Application definition
@@ -54,7 +53,7 @@ SESSION_COOKIE_DOMAIN = env.COOKIE_DOMAIN
 CSRF_COOKIE_DOMAIN = env.COOKIE_DOMAIN
 SESSION_COOKIE_SECURE = env.SECURE
 CSRF_COOKIE_SECURE = env.SECURE
-CSRF_TRUSTED_ORIGINS = env.CSRF_TRUSTED_ORIGINS
+CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1", "http://localhost"]
 
 
 # Включение cors для дебага
@@ -62,7 +61,7 @@ if env.CORS_ENABLED:
     INSTALLED_APPS += ["corsheaders"]
     MIDDLEWARE += ["corsheaders.middleware.CorsMiddleware"]
     CORS_ALLOW_CREDENTIALS = True
-    CORS_ALLOWED_ORIGINS = env.CORS_ALLOWED_ORIGINS
+    CORS_ALLOWED_ORIGINS = ["http://127.0.0.1", "http://localhost"]
     CORS_ORIGIN_ALLOW_ALL = True
 
 
@@ -71,9 +70,7 @@ ROOT_URLCONF = "core.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [
-            os.path.join(BASE_DIR, env.CLIENT_DIST_PATH),
-        ],
+        "DIRS": [],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -147,3 +144,11 @@ MEDIA_URL = "/media/"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Debug options
+if env.DEBUG:
+    import pandas as pd
+
+    pd.set_option("display.max_rows", 1000)
+    pd.set_option("display.max_columns", 1000)
+    pd.set_option("display.width", 1000)

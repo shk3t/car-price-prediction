@@ -1,25 +1,20 @@
 from __future__ import annotations
+
 import os
+import random
 
 import keras.api.backend as K
 import numpy as np
 import pandas as pd
+from core import env
 from keras.src.callbacks import LearningRateScheduler
 from keras.src.layers import Concatenate, Dense, Embedding, Flatten, Input
 from keras.src.metrics import RootMeanSquaredError
 from keras.src.models import Model
 from keras.src.optimizers import Adam
+from library.types import is_float
+from predict.models import CarInfo
 from sklearn.model_selection import KFold
-import random
-
-
-def is_float(value: str) -> bool:
-    try:
-        float(value)
-        return True
-    except ValueError:
-        return False
-
 
 VER = 1
 
@@ -39,6 +34,7 @@ class ModelManager:
         cat_uniq: dict
         cat_min: dict
 
+    TARGET = "price_usd"
     EPOCHS = 3
     LRS = [0.001, 0.001, 0.0001]
     FOLDS = 5
@@ -71,7 +67,7 @@ class ModelManager:
 
         # LABEL ENCODE CATEGORICAL FEATURES
         self.dm.cats = [
-            c for c in all_data.columns if c not in ["id", "price_usd"] + self.dm.nums
+            c for c in all_data.columns if c not in ["id", self.TARGET] + self.dm.nums
         ]
         self.dm.cat_size = []
         self.dm.cat_emb = []
@@ -126,8 +122,8 @@ class ModelManager:
 
         self._build = lambda: Model(inputs=[x_input_cats, x_input_nums], outputs=x)
 
-    @staticmethod
-    def _data_clearing(data: pd.DataFrame) -> pd.DataFrame:
+    @classmethod
+    def _data_clearing(cls, data: pd.DataFrame) -> pd.DataFrame:
         data = data.apply(lambda x: x.str.lower() if x.dtype == "object" else x)  # type: ignore
         data["engine_volume"] = (
             data["engine"]
@@ -183,12 +179,11 @@ class ModelManager:
             )
         )
         data["milage_km"] = data["milage"] * 1.60934
-        # data["price_rub"] = data["price"] * 95.0  # ruble exchange rate
         data = data.rename(
             columns={
                 "ext_col": "color",
                 "int_col": "interior_color",
-                "price": "price_usd",
+                "price": cls.TARGET,
             }
         )
         data["clean_title"] = data["clean_title"] == "yes"
@@ -204,6 +199,10 @@ class ModelManager:
         return cls(train, test)
 
     def prepare_data(self, data):
+        if "price_rub" in data:
+            data["price_usd"] = data["price_rub"] / env.USD_TO_RUB_EX_RATE
+            data = data.drop(columns=["price_rub"])
+
         # STANDARIZE NUMERICAL FEATURES
         for c in self.dm.nums:
             data[c] = (data[c] - self.dm.num_mean[c]) / self.dm.num_std[c]
@@ -267,7 +266,7 @@ class ModelManager:
         for i, (train_index, test_index) in enumerate(kf.split(train)):
             X_train_cats = train.loc[train_index, self.dm.cats].values
             X_train_nums = train.loc[train_index, self.dm.nums].values
-            y_train = train.loc[train_index, "price_usd"].values
+            y_train = train.loc[train_index, self.TARGET].values
 
             # TRAIN MODEL
             K.clear_session()
@@ -294,7 +293,7 @@ class ModelManager:
     def fine_tune(self, train):
         X_train_cats = train[self.dm.cats].values
         X_train_nums = train[self.dm.nums].values
-        y_train = train["price_usd"].values
+        y_train = train[self.TARGET].values
 
         model = random.choice(self.models)
         model.trainable = True
@@ -313,10 +312,18 @@ class ModelManager:
             verbose=2,  # type: ignore
         )
 
-    def print_rmse(self, oof, train):
+    def print_metrics(self, pred, train):
         # COMPUTE AND DISPLAY CV RMSE SCORE
-        rmse = np.sqrt(np.mean((oof - train.price_usd.values) ** 2))
-        print("Overall CV RMSE =", rmse)
+        c = 1
+        actual = train[self.TARGET].values
+
+        rmse = np.sqrt(np.mean((actual - pred) ** 2))
+        smape = np.mean(2 * np.abs(actual - pred) / actual + pred)
+        rmsle = np.sqrt(np.mean((np.log(actual + c) - np.log(pred + c)) ** 2))
+
+        print("RMSE =", rmse)
+        print("SMAPE =", smape)
+        print("RMSLE =", rmsle)
 
     def save_models(self, folder="../model_weights"):
         if not os.path.exists(folder):
@@ -349,16 +356,16 @@ class ModelManager:
         test = model_manager.prepare_data(test)
 
         model_manager.fit(train)
-        oof = model_manager.predict(train)
+        pred = model_manager.predict(train)
 
-        model_manager.print_rmse(oof, train)
+        model_manager.print_metrics(pred, train)
         model_manager.save_models()
+        CarInfo.objects.all().delete()
 
 
-if __name__ == "__main__":
+if env.REFIT_MODEL:
     ModelManager.clean_refit()
-    pass
+    exit()
 else:
-    # FOR EXPORT
     model_manager = ModelManager.clean_init()
     model_manager.load_models()

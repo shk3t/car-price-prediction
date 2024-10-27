@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-import env
+from core import env
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import AbstractUser
 from django.db import models

@@ -11,14 +11,14 @@ model_weights/
 # Private data
 .env
 env.*
-scripts/curl.sh
 
 # Python
-migrations/
+# migrations/
 __pycache__/
 .venv/
-.pytest_cache/
 venv/
+.pytest_cache/
+*.pyc
 
 # JavaScript
 node_modules/

@@ -3,6 +3,7 @@ package service
 import (
 	"bytes"
 	"encoding/json"
+	c "gateway/internal/config"
 	m "gateway/internal/model"
 	u "gateway/internal/utils"
 	"io"
@@ -83,7 +84,7 @@ func GetCarInfo(curlData string, carUrl string) (*m.CarInfo, error) {
 		saleData,
 		"image",
 		"",
-	) // TODO: shredinger images (1. Download html)
+	)
 	for key, value := range saleData {
 		strValue, ok := value.(string)
 		if ok {
@@ -103,8 +104,6 @@ func GetCarInfo(curlData string, carUrl string) (*m.CarInfo, error) {
 }
 
 func TranslateToEn(text string) string {
-	// docker run -e LT_LOAD_ONLY="en,ru" -ti --rm -p 5000:5000 libretranslate/libretranslate
-	url := "http://localhost:5000/translate"
 	payload := map[string]string{
 		"q":      text,
 		"source": "ru",
@@ -112,7 +111,14 @@ func TranslateToEn(text string) string {
 	}
 	payloadBytes, _ := json.Marshal(payload)
 
-	resp, _ := http.Post(url, "application/json", bytes.NewBuffer(payloadBytes))
+	resp, err := http.Post(
+		c.Env.TranslationServiceUrl+"/translate",
+		"application/json",
+		bytes.NewBuffer(payloadBytes),
+	)
+	if err != nil {
+		return ""
+	}
 	defer resp.Body.Close()
 
 	respMap := map[string]interface{}{}

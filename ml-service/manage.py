@@ -12,9 +12,9 @@ def main():
         from django.core.management import execute_from_command_line
 
         from django.core.management.commands.runserver import Command as runserver
-        from env import PORT
+        from core import env
 
-        runserver.default_port = str(PORT)
+        runserver.default_port = str(env.PORT)
     except ImportError as exc:
         raise ImportError(
             "Couldn't import Django. Are you sure it's installed and "

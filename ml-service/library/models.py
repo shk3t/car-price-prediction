@@ -1,14 +1,12 @@
-from itertools import cycle
 from typing import Any, Collection, Sequence
 
 from asgiref.sync import sync_to_async
+from core import env
 from django.db import models
 from django.db.models.base import ModelBase
 from django.db.models.functions import Trunc
-from pandas import DataFrame
-import env
-
 from library.typipng.querysets import TypedQuerySet
+from pandas import DataFrame
 
 
 class Fieldmeta:
@@ -71,7 +69,7 @@ class PerformantModel(models.Model, metaclass=FieldmetaModelBase):
             Совершает производительный "INSERT ... ON CONFLICT UPDATE"
             для большого объема данных
             """
-            Model: PerformantModel = self.model
+            Model: PerformantModel = self.model  # type: ignore
 
             if Model._fieldmeta.updatable:
                 return self.bulk_create(

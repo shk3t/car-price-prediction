@@ -3,7 +3,7 @@ from django.db import models
 
 class CarInfo(models.Model):
     class Meta:
-        db_table = "user_file"
+        db_table = "car_info"
         verbose_name = "Запись об автомобиле"
         verbose_name_plural = "Записи об автомобилях"
 
