@@ -3,9 +3,12 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	c "gateway/internal/config"
 	m "gateway/internal/model"
 	"gateway/internal/service"
+	u "gateway/internal/utils"
+	"io"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -18,7 +21,7 @@ func Predict(fctx *fiber.Ctx) error {
 		return fctx.Status(400).SendString(err.Error())
 	}
 
-	carInfo, err := service.GetCarInfo(reqBody.CarUrl)
+	carInfo, err := service.GetCarInfo(reqBody.CurlData, reqBody.CarUrl)
 	if err != nil {
 		return fctx.Status(400).SendString(err.Error())
 	}
@@ -46,5 +49,35 @@ func Predict(fctx *fiber.Ctx) error {
 }
 
 func FineTune(fctx *fiber.Ctx) error {
-	return nil
+	reqBody := m.FineTuneRequest{}
+	err := fctx.BodyParser(&reqBody)
+	if err != nil {
+		return fctx.Status(400).SendString(err.Error())
+	}
+
+	carInfos := []m.CarInfo{}
+	for _, carUrl := range reqBody.CarUrls {
+		carInfo, err := service.GetCarInfo(reqBody.CurlData, carUrl)
+		if err != nil {
+			return fctx.Status(400).SendString(err.Error())
+		}
+		carInfos = append(carInfos, *carInfo)
+	}
+
+	var buf bytes.Buffer
+	err = json.NewEncoder(&buf).Encode(carInfos)
+	if err != nil {
+		return fctx.Status(400).SendString(err.Error())
+	}
+
+	resp, err := http.Post(c.Env.MlServiceUrl+"/api/fine_tune", "application/json", &buf)
+	if err != nil {
+		return fctx.Status(400).SendString(err.Error())
+	}
+	if resp.StatusCode >= 400 {
+		err = errors.New(string(u.Default(io.ReadAll(resp.Body))))
+		return fctx.Status(400).SendString(err.Error())
+	}
+	defer resp.Body.Close()
+	return fctx.SendString("OK")
 }

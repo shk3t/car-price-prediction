@@ -7,7 +7,6 @@ import (
 	u "gateway/internal/utils"
 	"io"
 	"net/http"
-	"os"
 	"regexp"
 	"strconv"
 
@@ -17,31 +16,26 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-func GetCarInfo(carUrl string) (*m.CarInfo, error) {
+func GetCarInfo(curlData string, carUrl string) (*m.CarInfo, error) {
 	carInfo := m.CarInfo{
 		Url: carUrl,
 	}
 
-	scriptPath := "scripts/curl.sh"
-	// carUrl := "https://auto.ru/cars/used/sale/ford/mustang/1119446398-610c531a/"
+	curlArgs := strings.Split(curlData, " ")
+	curlArgs[1] = "'" + carUrl + "'"
+	curlData = strings.Join(curlArgs, " ")
 
-	cmd := exec.Command("bash", scriptPath, carUrl)
+	cmd := exec.Command("bash", "-c", curlData)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
-	// err := cmd.Run()
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	fileData, err := os.ReadFile("/home/shket/projects/draft/output.html")
+	err := cmd.Run()
 	if err != nil {
 		return nil, err
 	}
-	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(fileData))
 
-	// doc, err := goquery.NewDocumentFromReader(bytes.NewReader(stdout.Bytes()))
+	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(stdout.Bytes()))
 	if err != nil {
 		return nil, err
 	}
@@ -85,6 +79,11 @@ func GetCarInfo(carUrl string) (*m.CarInfo, error) {
 	}
 
 	saleData := u.GetAssertDefault(dataBem, "sale-data-attributes", map[string]interface{}{})
+	carInfo.Image = u.GetAssertDefault(
+		saleData,
+		"image",
+		"",
+	) // TODO: shredinger images (1. Download html)
 	for key, value := range saleData {
 		strValue, ok := value.(string)
 		if ok {
@@ -92,7 +91,6 @@ func GetCarInfo(carUrl string) (*m.CarInfo, error) {
 		}
 	}
 
-	carInfo.Image = u.GetAssertDefault(saleData, "image", "")
 	carInfo.Brand = u.GetAssertDefault(saleData, "mark", "")
 	carInfo.Model = u.GetAssertDefault(saleData, "model", "")
 	carInfo.ModelYear = int(u.GetAssertDefault(saleData, "year", 0.0))

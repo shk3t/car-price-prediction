@@ -21,9 +21,15 @@ type CarInfo struct {
 }
 
 type PredictRequest struct {
-	CarUrl string `json:"car_url"`
+	CarUrl   string `json:"car_url"`
+	CurlData string `json:"curl_data"`
 }
 
 type PredictionResponse struct {
 	RecommendedPriceRub float64 `json:"recommended_price_rub"`
+}
+
+type FineTuneRequest struct {
+	CarUrls  []string `json:"car_urls"`
+	CurlData string   `json:"curl_data"`
 }
