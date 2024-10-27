@@ -11,21 +11,25 @@ import (
 	"regexp"
 	"strconv"
 
-	// "os/exec"
+	"os/exec"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 )
 
-func GetCarInfo() (*m.CarInfo, error) {
-	// scriptPath := "scripts/curl.sh"
-	// offerId := "1125399844-18893495"
+func GetCarInfo(carUrl string) (*m.CarInfo, error) {
+	carInfo := m.CarInfo{
+		Url: carUrl,
+	}
 
-	// cmd := exec.Command("bash", scriptPath)
-	// var stdout, stderr bytes.Buffer
-	// cmd.Stdout = &stdout
-	// cmd.Stderr = &stderr
-	//
+	scriptPath := "scripts/curl.sh"
+	// carUrl := "https://auto.ru/cars/used/sale/ford/mustang/1119446398-610c531a/"
+
+	cmd := exec.Command("bash", scriptPath, carUrl)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
 	// err := cmd.Run()
 	// if err != nil {
 	// 	return nil, err
@@ -35,18 +39,16 @@ func GetCarInfo() (*m.CarInfo, error) {
 	if err != nil {
 		return nil, err
 	}
+	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(fileData))
 
 	// doc, err := goquery.NewDocumentFromReader(bytes.NewReader(stdout.Bytes()))
-	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(fileData))
 	if err != nil {
 		return nil, err
 	}
 
 	data, _ := doc.Find("div#sale-data-attributes").First().Attr("data-bem")
 
-	carInfo := m.CarInfo{}
 	numRe := regexp.MustCompile(`\d+[.,]?\d*`)
-
 
 	doc.Find("ul.CardInfo__list-MZpc1").Children().Each(
 		func(_ int, el *goquery.Selection) {
@@ -57,14 +59,16 @@ func GetCarInfo() (*m.CarInfo, error) {
 			switch attrName {
 			case "двигатель":
 				engParams := strings.Split(attrDivValue, "/")
-				carInfo.EngineVolume = u.Default(strconv.ParseFloat(numRe.FindString(engParams[0]), 64))
+				carInfo.EngineVolume = u.Default(
+					strconv.ParseFloat(numRe.FindString(engParams[0]), 64),
+				)
 				carInfo.EnginePower = u.Default(strconv.Atoi(numRe.FindString(engParams[1])))
 			case "коробка":
 				switch attrValue {
 				case "механическая":
-					carInfo.TransmissionType = "m"
+					carInfo.TransmissionType = "manual"
 				default:
-					carInfo.TransmissionType = "a"
+					carInfo.TransmissionType = "automatic"
 				}
 			case "цвет":
 				carInfo.Color = TranslateToEn(attrAValue)
@@ -88,13 +92,14 @@ func GetCarInfo() (*m.CarInfo, error) {
 		}
 	}
 
+	carInfo.Image = u.GetAssertDefault(saleData, "image", "")
 	carInfo.Brand = u.GetAssertDefault(saleData, "mark", "")
 	carInfo.Model = u.GetAssertDefault(saleData, "model", "")
 	carInfo.ModelYear = int(u.GetAssertDefault(saleData, "year", 0.0))
 	carInfo.MilageKm = int(u.GetAssertDefault(saleData, "km-age", 0.0))
 	carInfo.FuelType = u.GetAssertDefault(saleData, "engine-type", "")
 	carInfo.Color = u.GetAssertDefault(saleData, "engine-type", "")
-	// carInfo.PriceRub = u.GetAssertDefault(saleData, "price", 0.0)
+	carInfo.PriceRub = u.GetAssertDefault(saleData, "price", 0.0)
 
 	return &carInfo, nil
 }

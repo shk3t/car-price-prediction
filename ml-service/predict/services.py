@@ -176,9 +176,9 @@ class ModelManager:
             .str.split()
             .apply(
                 lambda vals: (
-                    [v[:-2] for v in vals if v.endswith("/t")]
-                    or ["d" for v in vals if v.endswith("/dual")]
-                    or ["-"]
+                    ["automatic" for v in vals if "a/t" in v or "/dual" in v]
+                    or ["manual" for v in vals if "m/t" in v]
+                    or [None]
                 )[0]
             )
         )
@@ -191,6 +191,7 @@ class ModelManager:
                 "price": "price_usd",
             }
         )
+        data["clean_title"] = data["clean_title"] == "yes"
         return data.drop(columns=["engine", "transmission", "milage"])
 
     @classmethod
@@ -355,7 +356,7 @@ class ModelManager:
 
 
 if __name__ == "__main__":
-    # ModelManager.clean_refit()
+    ModelManager.clean_refit()
     pass
 else:
     # FOR EXPORT
