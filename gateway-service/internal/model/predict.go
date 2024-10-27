@@ -13,7 +13,7 @@ type CarInfo struct {
 	Color             string  `json:"color"`
 	InteriorColor     string  `json:"interior_color"`
 	Accident          string  `json:"accident"`
-	CleanTitle        string  `json:"clean_title"`
+	CleanTitle        bool    `json:"clean_title"`
 	PriceRub          float64 `json:"price_rub"`
 }
 

@@ -7,27 +7,37 @@ import (
 	u "gateway/internal/utils"
 	"io"
 	"net/http"
-	"os/exec"
+	"os"
+	"regexp"
+	"strconv"
+
+	// "os/exec"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 )
 
 func GetCarInfo() (*m.CarInfo, error) {
-	scriptPath := "scripts/curl.sh"
+	// scriptPath := "scripts/curl.sh"
 	// offerId := "1125399844-18893495"
 
-	cmd := exec.Command("bash", scriptPath)
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
+	// cmd := exec.Command("bash", scriptPath)
+	// var stdout, stderr bytes.Buffer
+	// cmd.Stdout = &stdout
+	// cmd.Stderr = &stderr
+	//
+	// err := cmd.Run()
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	err := cmd.Run()
+	fileData, err := os.ReadFile("/home/shket/projects/draft/output.html")
 	if err != nil {
 		return nil, err
 	}
 
-	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(stdout.Bytes()))
+	// doc, err := goquery.NewDocumentFromReader(bytes.NewReader(stdout.Bytes()))
+	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(fileData))
 	if err != nil {
 		return nil, err
 	}
@@ -35,15 +45,31 @@ func GetCarInfo() (*m.CarInfo, error) {
 	data, _ := doc.Find("div#sale-data-attributes").First().Attr("data-bem")
 
 	carInfo := m.CarInfo{}
+	numRe := regexp.MustCompile(`\d+[.,]?\d*`)
+
 
 	doc.Find("ul.CardInfo__list-MZpc1").Children().Each(
 		func(_ int, el *goquery.Selection) {
-			attrName := el.Find("div").First().Text()
-			// attrValue := el.Find("div").Last().Text()
-			attrAValue := el.Find("a").First().Text()
+			attrName := strings.ToLower(el.Children().First().Text())
+			attrValue := strings.ToLower(el.Children().Last().Text())
+			attrDivValue := strings.ToLower(el.Find("div > div").Text())
+			attrAValue := strings.ToLower(el.Find("a").First().Text())
 			switch attrName {
-			case "Цвет":
-				carInfo.Color = strings.ToLower(TranslateToEn(attrAValue))
+			case "двигатель":
+				engParams := strings.Split(attrDivValue, "/")
+				carInfo.EngineVolume = u.Default(strconv.ParseFloat(numRe.FindString(engParams[0]), 64))
+				carInfo.EnginePower = u.Default(strconv.Atoi(numRe.FindString(engParams[1])))
+			case "коробка":
+				switch attrValue {
+				case "механическая":
+					carInfo.TransmissionType = "m"
+				default:
+					carInfo.TransmissionType = "a"
+				}
+			case "цвет":
+				carInfo.Color = TranslateToEn(attrAValue)
+			case "таможня":
+				carInfo.CleanTitle = attrValue == "растаможен"
 			}
 		},
 	)
@@ -55,32 +81,23 @@ func GetCarInfo() (*m.CarInfo, error) {
 	}
 
 	saleData := u.GetAssertDefault(dataBem, "sale-data-attributes", map[string]interface{}{})
-	carInfo.Brand = strings.ToLower(u.GetAssertDefault(saleData, "mark", ""))
-	carInfo.Model = strings.ToLower(u.GetAssertDefault(saleData, "model", ""))
+	for key, value := range saleData {
+		strValue, ok := value.(string)
+		if ok {
+			saleData[key] = strings.ToLower(strValue)
+		}
+	}
+
+	carInfo.Brand = u.GetAssertDefault(saleData, "mark", "")
+	carInfo.Model = u.GetAssertDefault(saleData, "model", "")
 	carInfo.ModelYear = int(u.GetAssertDefault(saleData, "year", 0.0))
 	carInfo.MilageKm = int(u.GetAssertDefault(saleData, "km-age", 0.0))
-	carInfo.FuelType = strings.ToLower(u.GetAssertDefault(saleData, "engine-type", ""))
-
-	// carInfo.EngineVolume = u.GetAssertDefault(saleData, "power", 0.0)  // TODO
-	carInfo.EnginePower = u.GetAssertDefault(saleData, "power", 0)
+	carInfo.FuelType = u.GetAssertDefault(saleData, "engine-type", "")
+	carInfo.Color = u.GetAssertDefault(saleData, "engine-type", "")
+	// carInfo.PriceRub = u.GetAssertDefault(saleData, "price", 0.0)
 
 	return &carInfo, nil
 }
-
-// Brand             string  `json:"brand"`
-// Model             string  `json:"model"`
-// ModelYear         int     `json:"model_year"`
-// MilageKm          int     `json:"milage_km"`
-// FuelType          string  `json:"fuel_type"`
-// EngineVolume      float64 `json:"engine_volume"`
-// EnginePower       float64 `json:"engine_power"`
-// TransmissionSpeed float64 `json:"transmission_speed"`
-// TransmissionType  string  `json:"transmission_type"`
-// Color             string  `json:"color"`
-// InteriorColor     string  `json:"interior_color"`
-// Accident          string  `json:"accident"`
-// CleanTitle        string  `json:"clean_title"`
-// PriceRub          float64 `json:"price_rub"`
 
 func TranslateToEn(text string) string {
 	// docker run -e LT_LOAD_ONLY="en,ru" -ti --rm -p 5000:5000 libretranslate/libretranslate
