@@ -25,13 +25,13 @@ func LoadEnvs() {
 	}
 
 	Env = envConfig{
-		Port:      force.Default(strconv.Atoi(os.Getenv("PORT"))),
+		Port:      force.Default(strconv.Atoi(os.Getenv("GW_PORT"))),
 		SecretKey: os.Getenv("ML_SECRET_KEY"),
 		MlServiceUrl: fmt.Sprintf(
 			"http://%s:%s",
-			os.Getenv("HOST"),
-			os.Getenv("ML_SERVICE_URL"),
+			os.Getenv("ML_HOST"),
+			os.Getenv("ML_PORT"),
 		),
-		TranslationServiceUrl: fmt.Sprintf("http://%s:%s", os.Getenv("HOST"), os.Getenv("TR_PORT")),
+		TranslationServiceUrl: fmt.Sprintf("http://%s:%s", os.Getenv("TR_HOST"), os.Getenv("TR_PORT")),
 	}
 }

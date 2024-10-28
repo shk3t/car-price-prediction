@@ -369,5 +369,3 @@ if env.REFIT_MODEL:
 else:
     model_manager = ModelManager.clean_init()
     model_manager.load_models()
-
-print("REACHED")

@@ -1,10 +1,10 @@
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework.request import Request
+import pandas as pd
+from core import env
 from predict.serializers import CarInfoSerializer
 from predict.services import model_manager
-from core import env
-import pandas as pd
+from rest_framework.request import Request
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 
 class PredictView(APIView):

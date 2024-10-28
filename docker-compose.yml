@@ -1,53 +1,63 @@
 services:
-  database:
+  cardb:
+    container_name: $DB_HOST
     image: postgres:16
-    ports:
-      - $DB_PORT:$DB_PORT
-    volumes:
-      - car-data:/var/lib/postgres/data
-      - car-database.conf:/var/lib/postgres/data/postgresql.conf
     environment:
       - POSTGRES_USER=$DB_USER
       - POSTGRES_PASSWORD=$DB_PASSWORD
       - POSTGRES_DB=$DB_NAME
       - PGUSER=$DB_USER
       - PGPORT=$DB_PORT
+    volumes:
+      - car-data:/var/lib/postgres/data
+      - car-database.conf:/var/lib/postgres/data/postgresql.conf
+    ports:
+      - 5433:$DB_PORT
     healthcheck:
         test: ["CMD-SHELL", "pg_isready -U $DB_USER -d $DB_NAME"]
         interval: 3s
         timeout: 5s
         retries: 5
 
-  ml_service:
+  ml:
+    container_name: $ML_HOST
     depends_on:
-      - database
+      - cardb
     build:
       context: ml-service
       dockerfile: Dockerfile
     ports:
-      - 8000:8000
+      - $ML_PORT:$ML_PORT
 
-  ml_service:
+  translate:
+    container_name: $TR_HOST
+    image: libretranslate/libretranslate
+    environment:
+      - LT_LOAD_ONLY=en,ru
+      - LT_PORT=$TR_PORT
+    ports:
+      - $TR_PORT:$TR_PORT
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://$HOST:$TR_PORT"]
+
+  gateway:
+    container_name: $GW_HOST
     depends_on:
-      - database
+      - translate
     build:
-      context: ml-service
+      context: gateway-service
       dockerfile: Dockerfile
     ports:
-      - 8000:8000
+      - $GW_PORT:$GW_PORT
 
-  client:
-    build:
-      context: client
-      dockerfile: Dockerfile
-    ports:
-      - 3000:3000
+  # client:
+  #   build:
+  #     context: client
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - 3000:3000
 
 
 volumes:
-  gogame-data:
-  gogame-database.conf:
-  gogame-cache:
-  gogame-cache.conf:
-
-# // docker run -e LT_LOAD_ONLY="en,ru" -ti --rm -p 5000:5000 libretranslate/libretranslate
+  car-data:
+  car-database.conf:

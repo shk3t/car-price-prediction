@@ -19,7 +19,7 @@ SECRET_KEY = env.SECRET_KEY
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.DEBUG
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "0.0.0.0", env.ML_HOST, env.GW_HOST]
 
 
 # Application definition
@@ -45,24 +45,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
-
-
-CSRF_COOKIE_SAMESITE = "None" if env.DEBUG else "Lax"
-SESSION_COOKIE_SAMESITE = "None" if env.DEBUG else "Lax"
-SESSION_COOKIE_DOMAIN = env.COOKIE_DOMAIN
-CSRF_COOKIE_DOMAIN = env.COOKIE_DOMAIN
-SESSION_COOKIE_SECURE = env.SECURE
-CSRF_COOKIE_SECURE = env.SECURE
-CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1", "http://localhost"]
-
-
-# Включение cors для дебага
-if env.CORS_ENABLED:
-    INSTALLED_APPS += ["corsheaders"]
-    MIDDLEWARE += ["corsheaders.middleware.CorsMiddleware"]
-    CORS_ALLOW_CREDENTIALS = True
-    CORS_ALLOWED_ORIGINS = ["http://127.0.0.1", "http://localhost"]
-    CORS_ORIGIN_ALLOW_ALL = True
 
 
 ROOT_URLCONF = "core.urls"

@@ -97,7 +97,6 @@ func GetCarInfo(curlData string, carUrl string) (*m.CarInfo, error) {
 	carInfo.ModelYear = int(u.GetAssertDefault(saleData, "year", 0.0))
 	carInfo.MilageKm = int(u.GetAssertDefault(saleData, "km-age", 0.0))
 	carInfo.FuelType = u.GetAssertDefault(saleData, "engine-type", "")
-	carInfo.Color = u.GetAssertDefault(saleData, "engine-type", "")
 	carInfo.PriceRub = u.GetAssertDefault(saleData, "price", 0.0)
 
 	return &carInfo, nil
