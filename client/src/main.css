@@ -116,10 +116,6 @@ textarea:focus,
 select:focus {
   outline: none;
 }
-textarea {
-  height: 16em;
-  width: 28em;
-}
 ::-webkit-resizer {
   border-left: 100px solid transparent;
   border-top: 100px solid transparent;
@@ -127,7 +123,8 @@ textarea {
   border-bottom: 100px solid var(--surface);
 }
 
-ul, li {
+ul,
+li {
   list-style-type: none;
   margin: 0;
   padding: 0;

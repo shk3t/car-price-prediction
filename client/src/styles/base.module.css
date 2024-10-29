@@ -37,9 +37,10 @@ ul.vcenteringContainer > li.big {
 .frame.clickable:hover {
   border: 6px solid var(--gold);
 }
-
-.stringSpan {
-  color: var(--gold);
+.bgFrame {
+  box-shadow:
+    -40px -40px 0 -10px var(--base),
+    -40px -40px 0 0px var(--overlay);
 }
 
 .niceButton,
