@@ -98,6 +98,7 @@ em {
 
 button,
 input,
+textarea,
 select {
   font: inherit;
   background-color: inherit;
@@ -105,13 +106,25 @@ select {
   border: 0;
   padding: 0;
 }
-button, select {
+button,
+select {
   cursor: pointer;
   user-select: none;
 }
 input:focus,
+textarea:focus,
 select:focus {
   outline: none;
+}
+textarea {
+  height: 16em;
+  width: 28em;
+}
+::-webkit-resizer {
+  border-left: 100px solid transparent;
+  border-top: 100px solid transparent;
+  border-right: 100px solid var(--surface);
+  border-bottom: 100px solid var(--surface);
 }
 
 ul, li {

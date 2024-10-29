@@ -1,0 +1,15 @@
+p.singleLabel {
+  font-size: 2em;
+  margin: 0.6rem 0;
+}
+
+div.gigaGap {
+  height: 500vh;
+  display: flex;
+  justify-content: center;
+  background-image: linear-gradient(var(--surface), #0001ab);
+}
+
+footer > img {
+  width: 100vw;
+}

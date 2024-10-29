@@ -1,4 +1,4 @@
-.defaultMargin *:not(div, svg),
+.defaultMargin *:not(div, span, svg),
 .marginEverything * {
   margin: var(--default-margin);
 }
@@ -38,8 +38,13 @@ ul.vcenteringContainer > li.big {
   border: 6px solid var(--gold);
 }
 
+.stringSpan {
+  color: var(--gold);
+}
+
 .niceButton,
 .niceInput,
+.veryNiceInput,
 .niceSelect,
 .niceCheckbox::after {
   transition: 0.2s all;
@@ -73,19 +78,23 @@ ul.vcenteringContainer > li.big {
 }
 
 .niceInput,
+.veryNiceInput,
 .niceSelect {
   padding: 10px;
   background-color: var(--overlay);
 }
 
 .niceInput:focus,
-.niceInput:hover {
+.niceInput:hover,
+.veryNiceInput:focus,
+.veryNiceInput:hover {
   color: var(--rose);
 }
 .niceSelect:hover {
   color: var(--iris);
 }
-.niceInput::placeholder {
+.niceInput::placeholder,
+.veryNiceInput::placeholder {
   color: var(--highlight-high);
 }
 
