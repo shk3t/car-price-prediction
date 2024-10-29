@@ -1,6 +1,5 @@
 import MainContainer from "../components/containers/MainContainer"
 import CenteringContainer from "../components/containers/CenteringContainer"
-import NiceButton from "../components/buttons/NiceButton"
 import NiceInput from "../components/inputs/NiceInput"
 import SectionContainer from "../components/containers/SectionContainer"
 import {capitalize} from "lodash"
@@ -13,9 +12,13 @@ import PredictService from "../services/PredictService"
 
 export default function PredictPage() {
   const actionComponents = buildActionComponents("Predict", sendRequest, resetActionComponent)
-  const [curActionComponent, setActionComponent] = useState<JSX.Element>(actionComponents.button)
   const [carUrl, setCarUrl] = useState<string>("")
   const [carInfo, setCarInfo] = useState<CarInfo>(emptyCarInfo)
+  const [curActionComponent, setActionComponent] = useState<JSX.Element>(actionComponents.button)
+
+  useEffect(() => {
+    setActionComponent(actionComponents.button)
+  }, [carUrl])
 
   async function sendRequest() {
     const curlData = localStorage.getItem("curlData")
@@ -38,16 +41,20 @@ export default function PredictPage() {
     setActionComponent(actionComponents.button)
   }
 
+  const niceInput = (
+    <NiceInput
+      size={80}
+      placeholder="https://auto.ru/cars/used/sale/lamborghini/aventador/1116087097-7a1c0fc2/"
+      value={carUrl}
+      onChange={(e) => setCarUrl(e.target.value)}
+    ></NiceInput>
+  )
+
   const emptyComponent = (
     <MainContainer>
       <CenteringContainer vertical={true}>
         <h3>Put your dream car URL here</h3>
-        <NiceInput
-          size={80}
-          placeholder="https://auto.ru/cars/used/sale/lamborghini/aventador/1116087097-7a1c0fc2/"
-          value={carUrl}
-          onChange={(e) => setCarUrl(e.target.value)}
-        ></NiceInput>
+        {niceInput}
         {curActionComponent}
       </CenteringContainer>
     </MainContainer>
@@ -57,11 +64,8 @@ export default function PredictPage() {
     <MainContainer flexEnabled={false}>
       <SectionContainer>
         <h3>Put your dream car URL here</h3>
-        <NiceInput
-          size={80}
-          placeholder="https://auto.ru/cars/used/sale/lamborghini/aventador/1116087097-7a1c0fc2/"
-        ></NiceInput>
-        <NiceButton>Predict</NiceButton>
+        {niceInput}
+        {curActionComponent}
       </SectionContainer>
       <SectionContainer>
         <h1>

@@ -37,3 +37,25 @@ export const emptyCarInfo: CarInfo = {
   priceRub: 0,
   recommendedPriceRub: 0,
 }
+
+export function carInfoFromResponse(data: any): CarInfo {
+  return {
+    url: data.url,
+    image: data.image,
+    brand: data.brand,
+    model: data.model,
+    modelYear: data.model_year,
+    milageKm: data.milage_km,
+    fuelType: data.fuel_type,
+    engineVolume: data.engine_volume,
+    enginePower: data.engine_power,
+    transmissionSpeed: data.transmission_speed,
+    transmissionType: data.transmission_type,
+    color: data.color,
+    interiorColor: data.interior_color,
+    accident: data.accident,
+    cleanTitle: data.clean_title,
+    priceRub: data.price_rub,
+    recommendedPriceRub: data.recommended_price_rub,
+  }
+}

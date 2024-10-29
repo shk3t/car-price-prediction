@@ -9,8 +9,8 @@ export function buildActionComponents(
   resetActionComponent: () => void,
 ) {
   return {
-    button: <NiceButton onClick={sendRequest}>{buttonText}</NiceButton>,
-    loading: <h5 style={{color: hexColors.text}}>Loading...</h5>, // TODO: add animation
+    button: <NiceButton onClick={() => sendRequest()}>{buttonText}</NiceButton>,
+    loading: <h5 style={{color: hexColors.text}}>Loading...</h5>,
     done: (
       <h5 style={{color: hexColors.foam}} onClick={resetActionComponent}>
         Done!
