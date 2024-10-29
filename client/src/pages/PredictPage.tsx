@@ -7,11 +7,14 @@ import {capitalize} from "lodash"
 import {CarInfo} from "../types/predict"
 import styles from "../styles/base.module.css"
 import {hexColors} from "../consts/utils"
+import {useEffect, useState} from "react"
+import {buildActionComponents} from "../helpers/builders"
 
-export default function StartPage() {
+export default function PredictPage() {
   const carInfo: CarInfo = {
     url: "https://example.com/car-image",
-    image: "https://avatars.mds.yandex.net/get-autoru-vos/2176223/1c9265384b26525d3926949e48c4a5ac/1200x900n",
+    image:
+      "https://avatars.mds.yandex.net/get-autoru-vos/2176223/1c9265384b26525d3926949e48c4a5ac/1200x900n",
     brand: "toyota",
     model: "corolla",
     modelYear: 2020,
@@ -29,16 +32,35 @@ export default function StartPage() {
     recommendedPriceRub: 160000,
   }
 
-  // carInfo.url = ""
+  carInfo.url = ""
+
+  const actionComponents = buildActionComponents("Predict", sendRequest, resetActionComponent)
+
+  const [curActionComponent, setActionComponent] = useState(actionComponents.button)
+
+  function sendRequest() {
+    if (localStorage.getItem("curlData")) {
+      setActionComponent(actionComponents.loading)
+      alert("Your request was sent! (TODO)") // TODO: send request
+      setActionComponent(actionComponents.done)
+    } else {
+      setActionComponent(actionComponents.curlError)
+    }
+  }
+
+  function resetActionComponent() {
+    setActionComponent(actionComponents.button)
+  }
 
   const emptyComponent = (
     <MainContainer>
       <CenteringContainer vertical={true}>
+        <h3>Put your dream car URL here</h3>
         <NiceInput
           size={80}
           placeholder="https://auto.ru/cars/used/sale/lamborghini/aventador/1116087097-7a1c0fc2/"
         ></NiceInput>
-        <NiceButton>Predict</NiceButton>
+        {curActionComponent}
       </CenteringContainer>
     </MainContainer>
   )
@@ -46,6 +68,7 @@ export default function StartPage() {
   const predictedComponent = (
     <MainContainer flexEnabled={false}>
       <SectionContainer>
+        <h3>Put your dream car URL here</h3>
         <NiceInput
           size={80}
           placeholder="https://auto.ru/cars/used/sale/lamborghini/aventador/1116087097-7a1c0fc2/"
@@ -57,7 +80,8 @@ export default function StartPage() {
           Recommended price:{" "}
           <span
             style={{
-              color: carInfo.recommendedPriceRub < carInfo.priceRub ? hexColors.foam : hexColors.love,
+              color:
+                carInfo.recommendedPriceRub < carInfo.priceRub ? hexColors.foam : hexColors.love,
             }}
           >
             {carInfo.recommendedPriceRub.toLocaleString("ru-RU")} ₽
@@ -75,7 +99,10 @@ export default function StartPage() {
               <b>
                 <span
                   style={{
-                    color: carInfo.priceRub < carInfo.recommendedPriceRub ? hexColors.foam : hexColors.love,
+                    color:
+                      carInfo.priceRub < carInfo.recommendedPriceRub
+                        ? hexColors.foam
+                        : hexColors.love,
                   }}
                 >
                   {carInfo.priceRub.toLocaleString("ru-RU")} ₽
@@ -93,7 +120,8 @@ export default function StartPage() {
               Year: <b style={{color: hexColors.gold}}>{carInfo.modelYear}</b>
             </p>
             <p>
-              Milage in km: <b style={{color: hexColors.gold}}>{carInfo.milageKm.toLocaleString("ru-RU")}</b>
+              Milage in km:{" "}
+              <b style={{color: hexColors.gold}}>{carInfo.milageKm.toLocaleString("ru-RU")}</b>
             </p>
             <p>
               Fuel type: <b style={{color: hexColors.gold}}>{carInfo.fuelType}</b>
@@ -102,11 +130,15 @@ export default function StartPage() {
               Engine volume: <b style={{color: hexColors.gold}}>{carInfo.engineVolume} L</b>
             </p>
             <p>
-              Engine power: <b style={{color: hexColors.gold}}>{carInfo.enginePower.toLocaleString("ru-RU")} HP</b>
+              Engine power:{" "}
+              <b style={{color: hexColors.gold}}>
+                {carInfo.enginePower.toLocaleString("ru-RU")} HP
+              </b>
             </p>
             {carInfo.transmissionSpeed && (
               <p>
-                Transmission speed: <b style={{color: hexColors.gold}}>{carInfo.transmissionSpeed} DT</b>
+                Transmission speed:{" "}
+                <b style={{color: hexColors.gold}}>{carInfo.transmissionSpeed} DT</b>
               </p>
             )}
             <p>
@@ -122,11 +154,13 @@ export default function StartPage() {
             )}
             {carInfo.accident && (
               <p>
-                Accident history: <b style={{color: hexColors.gold}}>{capitalize(carInfo.accident)}</b>
+                Accident history:{" "}
+                <b style={{color: hexColors.gold}}>{capitalize(carInfo.accident)}</b>
               </p>
             )}
             <p>
-              Clean title: <b style={{color: hexColors.gold}}>{carInfo.cleanTitle ? "yes" : "no"}</b>
+              Clean title:{" "}
+              <b style={{color: hexColors.gold}}>{carInfo.cleanTitle ? "yes" : "no"}</b>
             </p>
           </div>
         </CenteringContainer>
