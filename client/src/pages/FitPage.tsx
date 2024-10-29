@@ -7,7 +7,7 @@ import {useState} from "react"
 export default function FitPage() {
   const actionComponents = buildActionComponents("Fit", sendRequest, resetActionComponent)
 
-  const [curActionComponent, setActionComponent] = useState(actionComponents.button)
+  const [curActionComponent, setActionComponent] = useState<JSX.Element>(actionComponents.button)
 
   function sendRequest() {
     if (localStorage.getItem("curlData")) {

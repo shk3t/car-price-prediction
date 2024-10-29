@@ -4,45 +4,31 @@ import NiceButton from "../components/buttons/NiceButton"
 import NiceInput from "../components/inputs/NiceInput"
 import SectionContainer from "../components/containers/SectionContainer"
 import {capitalize} from "lodash"
-import {CarInfo} from "../types/predict"
+import {CarInfo, emptyCarInfo} from "../types/predict"
 import styles from "../styles/base.module.css"
 import {hexColors} from "../consts/utils"
 import {useEffect, useState} from "react"
 import {buildActionComponents} from "../helpers/builders"
+import PredictService from "../services/PredictService"
 
 export default function PredictPage() {
-  const carInfo: CarInfo = {
-    url: "https://example.com/car-image",
-    image:
-      "https://avatars.mds.yandex.net/get-autoru-vos/2176223/1c9265384b26525d3926949e48c4a5ac/1200x900n",
-    brand: "toyota",
-    model: "corolla",
-    modelYear: 2020,
-    milageKm: 30000,
-    fuelType: "gasoline",
-    engineVolume: 1.8,
-    enginePower: 140,
-    transmissionSpeed: null, // Assuming no transmission speed provided
-    transmissionType: "automatic",
-    color: "blue",
-    interiorColor: null, // Assuming no interior color provided
-    accident: null, // Assuming no accident history provided
-    cleanTitle: true,
-    priceRub: 150000,
-    recommendedPriceRub: 160000,
-  }
-
-  carInfo.url = ""
-
   const actionComponents = buildActionComponents("Predict", sendRequest, resetActionComponent)
+  const [curActionComponent, setActionComponent] = useState<JSX.Element>(actionComponents.button)
+  const [carUrl, setCarUrl] = useState<string>("")
+  const [carInfo, setCarInfo] = useState<CarInfo>(emptyCarInfo)
 
-  const [curActionComponent, setActionComponent] = useState(actionComponents.button)
-
-  function sendRequest() {
-    if (localStorage.getItem("curlData")) {
+  async function sendRequest() {
+    const curlData = localStorage.getItem("curlData")
+    if (curlData) {
       setActionComponent(actionComponents.loading)
-      alert("Your request was sent! (TODO)") // TODO: send request
-      setActionComponent(actionComponents.done)
+      try {
+        const newCarInfo = await PredictService.predict(carUrl, curlData)
+        setCarInfo(newCarInfo)
+        setActionComponent(actionComponents.done)
+      } catch (error) {
+        console.log(error)
+        setActionComponent(actionComponents.requestError)
+      }
     } else {
       setActionComponent(actionComponents.curlError)
     }
@@ -59,6 +45,8 @@ export default function PredictPage() {
         <NiceInput
           size={80}
           placeholder="https://auto.ru/cars/used/sale/lamborghini/aventador/1116087097-7a1c0fc2/"
+          value={carUrl}
+          onChange={(e) => setCarUrl(e.target.value)}
         ></NiceInput>
         {curActionComponent}
       </CenteringContainer>

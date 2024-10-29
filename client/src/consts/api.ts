@@ -1,0 +1,1 @@
+export const GATEWAY_URL = `http://${import.meta.env.VITE_GW_HOST}:${import.meta.env.VITE_GW_PORT}`

@@ -1,4 +1,4 @@
-export interface CarInfo {
+export type CarInfo = {
   url: string
   image: string
   brand: string
@@ -16,4 +16,24 @@ export interface CarInfo {
   cleanTitle: boolean
   priceRub: number
   recommendedPriceRub: number
+}
+
+export const emptyCarInfo: CarInfo = {
+  url: "",
+  image: "",
+  brand: "",
+  model: "",
+  modelYear: 0,
+  milageKm: 0,
+  fuelType: "",
+  engineVolume: 0,
+  enginePower: 0,
+  transmissionSpeed: null,
+  transmissionType: "",
+  color: "",
+  interiorColor: null,
+  accident: null,
+  cleanTitle: true,
+  priceRub: 0,
+  recommendedPriceRub: 0,
 }
