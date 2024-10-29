@@ -6,7 +6,7 @@ import {useEffect, useState} from "react"
 import PredictService from "../services/PredictService"
 
 export default function FitPage() {
-  const actionComponents = buildActionComponents("Predict", sendRequest, resetActionComponent)
+  const actionComponents = buildActionComponents("Fit", sendRequest, resetActionComponent)
   const [carUrls, setCarUrls] = useState<string>("")
   const [curActionComponent, setActionComponent] = useState<JSX.Element>(actionComponents.button)
 
