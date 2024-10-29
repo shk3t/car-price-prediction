@@ -22,7 +22,8 @@ func GetCarInfo(curlData string, carUrl string) (*m.CarInfo, error) {
 		Url: carUrl,
 	}
 
-	curlArgs := strings.Split(curlData, " ")
+	curlData = strings.ReplaceAll(curlData, "\\", "")
+	curlArgs := strings.Fields(curlData)
 	curlArgs[1] = "'" + carUrl + "'"
 	curlData = strings.Join(curlArgs, " ")
 

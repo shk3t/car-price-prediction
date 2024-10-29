@@ -8,6 +8,7 @@ import (
 
 	"github.com/bytedance/sonic"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -23,6 +24,7 @@ func main() {
 		JSONDecoder: sonic.Unmarshal,
 	})
 
+	app.Use(cors.New())
 	app.Use(logger.New())
 
 	router.SetupRoutes(app)

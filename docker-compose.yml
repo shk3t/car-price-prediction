@@ -50,12 +50,13 @@ services:
     ports:
       - $GW_PORT:$GW_PORT
 
-  # client:
-  #   build:
-  #     context: client
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - 3000:3000
+  client:
+    container_name: $VITE_CLIENT_HOST
+    build:
+      context: client
+      dockerfile: Dockerfile
+    ports:
+      - $VITE_CLIENT_PORT:$VITE_CLIENT_PORT
 
 
 volumes:
