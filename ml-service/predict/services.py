@@ -318,7 +318,7 @@ class ModelManager:
         actual = train[self.TARGET].values
 
         rmse = np.sqrt(np.mean((actual - pred) ** 2))
-        smape = np.mean(2 * np.abs(actual - pred) / actual + pred)
+        smape = np.mean(2 * np.abs(actual - pred) / (actual + pred))
         rmsle = np.sqrt(np.mean((np.log(actual + c) - np.log(pred + c)) ** 2))
 
         print("RMSE =", rmse)
